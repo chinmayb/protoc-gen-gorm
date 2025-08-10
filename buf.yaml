@@ -1,6 +1,6 @@
 # https://docs.buf.build/lint-usage/
 version: v1
-name: infoblox.com/infobloxopen/protoc-gen-gorm
+name: buf.build/chinmayb/protoc-gen-gorm
 lint:
   use:
     - DEFAULT

@@ -1,0 +1,17 @@
+name: Publish Buf Module
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  buf-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Buf
+        uses: bufbuild/buf-setup-action@v1
+      - name: Login to Buf
+        run: echo "${{ secrets.BUF_TOKEN }}" | buf registry login --username chinmayb --token-stdin
+      - name: Push to Buf
+        run: buf push

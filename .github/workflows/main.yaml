@@ -12,6 +12,6 @@ jobs:
       - name: Set up Buf
         uses: bufbuild/buf-setup-action@v1
       - name: Login to Buf
-        run: echo "${{ secrets.BUF_TOKEN }}" | buf registry login --username chinmayb --token-stdin
+        run: echo "${{ secrets.BUF_TOKEN }}" | buf registry login --token-stdin
       - name: Push to Buf
         run: buf push

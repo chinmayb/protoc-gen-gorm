@@ -20,31 +20,27 @@ jobs:
           echo "Ref: ${{ github.ref }}"
           echo "Actor: ${{ github.actor }}"
           echo ""
-          echo "=== Environment Variables ==="
-          env | grep -E "(GITHUB_|BUF|buf)" | sort || echo "No relevant variables found"
+          echo "=== Testing Variables vs Secrets ==="
+          echo "Variable buf_token length: ${#VAR_BUF_TOKEN}"
+          echo "Secret buf_token length: ${#SECRET_BUF_TOKEN}"
+          echo "Variable buf_token exists: ${{ vars.buf_token != '' }}"
+          echo "Secret buf_token exists: ${{ secrets.buf_token != '' }}"
           echo ""
-          echo "=== Secret Availability ==="
-          echo "Lowercase buf_token length: ${#BUF_TOKEN_LOWER}"
-          echo "Uppercase BUF_TOKEN length: ${#BUF_TOKEN_UPPER}"
-          echo "buf_token exists: ${{ secrets.buf_token != '' }}"
-          echo "BUF_TOKEN exists: ${{ secrets.BUF_TOKEN != '' }}"
-          echo ""
-          if [ -n "$BUF_TOKEN_LOWER" ]; then
-            echo "✓ Using lowercase buf_token secret"
-            echo "$BUF_TOKEN_LOWER" | buf registry login --token-stdin
-          elif [ -n "$BUF_TOKEN_UPPER" ]; then
-            echo "✓ Using uppercase BUF_TOKEN secret"
-            echo "$BUF_TOKEN_UPPER" | buf registry login --token-stdin
+          if [ -n "$VAR_BUF_TOKEN" ]; then
+            echo "✓ Using buf_token variable"
+            echo "$VAR_BUF_TOKEN" | buf registry login --token-stdin
+          elif [ -n "$SECRET_BUF_TOKEN" ]; then
+            echo "✓ Using buf_token secret"
+            echo "$SECRET_BUF_TOKEN" | buf registry login --token-stdin
           else
-            echo "❌ Error: Neither buf_token nor BUF_TOKEN secrets are available"
-            echo "Please verify:"
-            echo "1. Secret is created in chinmayb/protoc-gen-gorm repository"
-            echo "2. Secret name is exactly 'buf_token' or 'BUF_TOKEN'"
-            echo "3. Workflow is running in the correct repository"
+            echo "❌ Error: buf_token not found as variable or secret"
+            echo "Please check GitHub repository settings under:"
+            echo "- Settings > Secrets and variables > Actions > Variables tab"
+            echo "- Settings > Secrets and variables > Actions > Secrets tab"
             exit 1
           fi
         env:
-          BUF_TOKEN_LOWER: ${{ secrets.buf_token }}
-          BUF_TOKEN_UPPER: ${{ secrets.BUF_TOKEN }}
+          VAR_BUF_TOKEN: ${{ vars.buf_token }}
+          SECRET_BUF_TOKEN: ${{ secrets.buf_token }}
       - name: Push to Buf
         run: buf push

@@ -12,6 +12,13 @@ jobs:
       - name: Set up Buf
         uses: bufbuild/buf-setup-action@v1
       - name: Login to Buf
-        run: echo "${{ secrets.BUF_TOKEN }}" | buf registry login --token-stdin
+        env:
+          BUF_TOKEN: ${{ secrets.BUF_TOKEN }}
+        run: |
+          if [ -z "$BUF_TOKEN" ]; then
+            echo "Error: BUF_TOKEN secret is not set or is empty"
+            exit 1
+          fi
+          echo "$BUF_TOKEN" | buf registry login --token-stdin
       - name: Push to Buf
         run: buf push

@@ -11,20 +11,36 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up Buf
         uses: bufbuild/buf-setup-action@v1
-      - name: Debug secrets
+      - name: Debug environment and secrets
         run: |
-          echo "Available environment variables:"
-          env | grep -E "(BUF|buf)" || echo "No BUF/buf variables found"
+          echo "=== Repository Information ==="
+          echo "Repository: ${{ github.repository }}"
+          echo "Repository Owner: ${{ github.repository_owner }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Actor: ${{ github.actor }}"
+          echo ""
+          echo "=== Environment Variables ==="
+          env | grep -E "(GITHUB_|BUF|buf)" | sort || echo "No relevant variables found"
+          echo ""
+          echo "=== Secret Availability ==="
           echo "Lowercase buf_token length: ${#BUF_TOKEN_LOWER}"
           echo "Uppercase BUF_TOKEN length: ${#BUF_TOKEN_UPPER}"
+          echo "buf_token exists: ${{ secrets.buf_token != '' }}"
+          echo "BUF_TOKEN exists: ${{ secrets.BUF_TOKEN != '' }}"
+          echo ""
           if [ -n "$BUF_TOKEN_LOWER" ]; then
-            echo "Using lowercase buf_token secret"
+            echo "✓ Using lowercase buf_token secret"
             echo "$BUF_TOKEN_LOWER" | buf registry login --token-stdin
           elif [ -n "$BUF_TOKEN_UPPER" ]; then
-            echo "Using uppercase BUF_TOKEN secret"
+            echo "✓ Using uppercase BUF_TOKEN secret"
             echo "$BUF_TOKEN_UPPER" | buf registry login --token-stdin
           else
-            echo "Error: Neither buf_token nor BUF_TOKEN secrets are available"
+            echo "❌ Error: Neither buf_token nor BUF_TOKEN secrets are available"
+            echo "Please verify:"
+            echo "1. Secret is created in chinmayb/protoc-gen-gorm repository"
+            echo "2. Secret name is exactly 'buf_token' or 'BUF_TOKEN'"
+            echo "3. Workflow is running in the correct repository"
             exit 1
           fi
         env:
